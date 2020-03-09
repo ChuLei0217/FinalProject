@@ -74,11 +74,11 @@ function loadData() {
 function draw() {
     var cdx = [], cdy = [];
     for(var i = 0; i < totalNumber; i++) {
-        cdx.push(coordinates[i][currentXAxis]);
-        cdy.push(coordinates[i][currentYAxis]);
+        cdx.push(coordinates[i][currentXAxis-1]);//加了个-1，因为这个没有第一列的车名，所以要往前数一个
+        cdy.push(coordinates[i][currentYAxis-1]);
     }
     var dataToDraw = {featureX: features[currentXAxis], coordsX: cdx,
-                      featureY: features[currentYAxis], coordsY: cdy};
+                      featureY: features[currentYAxis], coordsY: cdy,};
     var conf = {};
 
     d3.selectAll("svg").remove();
@@ -140,7 +140,7 @@ ScatterPlot = function (dataToDraw, conf) {
 
     var data = [];
     for(var i = 0; i < dataToDraw.coordsX.length; i++) {
-        var obj = {dx: dataToDraw.coordsX[i], dy: dataToDraw.coordsY[i]};
+        var obj = {dx: dataToDraw.coordsX[i], dy: dataToDraw.coordsY[i], dposition:i};
         data.push(obj);
     }
 
@@ -153,6 +153,9 @@ ScatterPlot = function (dataToDraw, conf) {
         .attr("cy", function (d) { return self.y(d.dy); } )
         .attr("r", 5.0)
         .style("cursor", "resize")
+        .on("mouseover", function (d) {
+            Tableupdate(d)
+        })
 
     //dropzones
     this.dropzoneView = this.svg.append("g")
@@ -212,22 +215,22 @@ ScatterPlot = function (dataToDraw, conf) {
         xavTop = canvasHeight-this.margin.bottom+dropSize*0.25;
     this.xAxisView = this.svg.append("g")
         .attr("id", "x-axis")
-        .attr("transform", "translate("+xavLeft+","+xavTop+")");
+        .attr("transform", "translate(490,"+560+")");
 
-    const yScale_x = d3.scaleLinear()
+    const xScale_x = d3.scaleLinear()
         .range([this.width-dropSize*2-120, 0])
         .domain([1, 0]);
-    this.yAxisView.append("g")
-        .attr("transform", "translate("+(xavLeft+50)+","+(xavTop-100)+")")
-        .call(d3.axisTop(yScale_x));
+    this.xAxisView.append("g")
+        .attr("transform", "translate(60,20)")
+        .call(d3.axisTop(xScale_x));
 
-    const xScale_x = d3.scaleBand()
-        .range([0, this.margin.bottom-20])
+    const yScale_x = d3.scaleBand()
+        .range([0, this.margin.bottom-40])
         .domain(features.slice(6))
         .padding(0.015)
-    this.yAxisView.append("g")
-        .attr("transform", "translate("+(xavLeft+50)+","+(xavTop-100)+")")
-        .call(d3.axisLeft(xScale_x));
+    this.xAxisView.append("g")
+        .attr("transform", "translate(60,20)")
+        .call(d3.axisLeft(yScale_x));
 
 }
 
@@ -236,42 +239,42 @@ ScatterPlot.prototype.redraw = function () {
 }
 
 
-function buildTable(index) {
-    d3.select("#dataPanel").selectAll("table").remove();
-    var vname = (index === -1) ? "Vehicle Name" : rawData[features[0]][index];
-
-    var table = d3.select("#dataPanel").append("table")
-        .attr("style", "margin-left: 5px; margin-top: 20px;");
-    var thead = table.append("thead");
-    var tbody = table.append("tbody");
-
-    var data = [];
-    var item0 = ["key", "value"];
-    for(var i = 1; i < featLength; i++) {
-        var feat = {key: features[i], value: (index === -1) ? "" : rawData[features[i]][index]};
-        data.push(feat);
-    }
-
-    var item1 = [vname, ""];
-    thead.append("tr")
-        .selectAll("th")
-        .data(item1)
-        .enter()
-        .append("th")
-        .text(function(column) { return column; });
-
-    var rows = tbody.selectAll("tr")
-        .data(data)
-        .enter()
-        .append("tr");
-
-    var cells = rows.selectAll("td")
-        .data(function(row) {
-            return item0.map(function(column) {
-                return {column: column, value: row[column]};
-            });
-        })
-        .enter()
-        .append("td")
-        .html(function(d) { return d.value; });
-}
+// function buildTable(index) {
+//     d3.select("#dataPanel").selectAll("table").remove();
+//     var vname = (index === -1) ? "Vehicle Name" : rawData[features[0]][index];
+//
+//     var table = d3.select("#dataPanel").append("table")
+//         .attr("style", "margin-left: 5px; margin-top: 20px;");
+//     var thead = table.append("thead");
+//     var tbody = table.append("tbody");
+//
+//     var data = [];
+//     var item0 = ["key", "value"];
+//     for(var i = 1; i < featLength; i++) {
+//         var feat = {key: features[i], value: (index === -1) ? "" : rawData[features[i]][index]};
+//         data.push(feat);
+//     }
+//
+//     var item1 = [vname, ""];
+//     thead.append("tr")
+//         .selectAll("th")
+//         .data(item1)
+//         .enter()
+//         .append("th")
+//         .text(function(column) { return column; });
+//
+//     var rows = tbody.selectAll("tr")
+//         .data(data)
+//         .enter()
+//         .append("tr");
+//
+//     var cells = rows.selectAll("td")
+//         .data(function(row) {
+//             return item0.map(function(column) {
+//                 return {column: column, value: row[column]};
+//             });
+//         })
+//         .enter()
+//         .append("td")
+//         .html(function(d) { return d.value; });
+// }
